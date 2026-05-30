@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050b07; /* Sleek pitch-dark green */
+  --foreground: #f8fafc;
+  --card: #0c150f;
+  --border: #162c1e;
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --accent: #eab308; /* Gold */
+  --accent-hover: #ca8a04;
+  --muted: #64748b;
+  --muted-foreground: #94a3b8;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(234, 179, 8, 0.03) 0%, transparent 40%);
+  background-attachment: fixed;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(5, 11, 7, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 285, 129, 0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.3);
+}
+
+/* Custom Glassmorphism class */
+.glass-panel {
+  background: rgba(12, 21, 15, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(22, 44, 30, 0.6);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(to right, #f59e0b, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.green-gradient-text {
+  background: linear-gradient(to right, #34d399, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -1,0 +1,45 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Game {
+  id          Int          @id @default(autoincrement())
+  stadium     String
+  stage       String       // e.g. "Grupo A", "32-avos", "Oitavas", "Quartas", "Semifinal", "Disputa de 3º", "Final"
+  date        DateTime
+  teamA       String
+  teamB       String
+  flagA       String       // Emoji flag or icon code
+  flagB       String       // Emoji flag or icon code
+  abbrevA     String       // e.g. "BRA"
+  abbrevB     String       // e.g. "ARG"
+  goalsA      Int?
+  goalsB      Int?
+  status      String       @default("scheduled") // "scheduled", "live", "finished"
+  predictions Prediction[]
+}
+
+model Player {
+  id          Int          @id @default(autoincrement())
+  uid         String       @unique @default(uuid())
+  name        String
+  predictions Prediction[]
+}
+
+model Prediction {
+  id        Int    @id @default(autoincrement())
+  playerId  Int
+  player    Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  gameId    Int
+  game      Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  goalsA    Int
+  goalsB    Int
+  points    Int    @default(0)
+
+  @@unique([playerId, gameId])
+}
