@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -21,16 +21,16 @@ export async function GET() {
       const predictionsDetail = player.predictions.map((pred) => {
         const isFinished = pred.game.status === 'finished';
         const isExact = isFinished && pred.goalsA === pred.game.goalsA && pred.goalsB === pred.game.goalsB;
-        
-        const realDiff = isFinished && pred.game.goalsA !== null && pred.game.goalsB !== null 
-          ? pred.game.goalsA - pred.game.goalsB 
+
+        const realDiff = isFinished && pred.game.goalsA !== null && pred.game.goalsB !== null
+          ? pred.game.goalsA - pred.game.goalsB
           : 0;
         const predDiff = pred.goalsA - pred.goalsB;
         const isOutcome = isFinished && !isExact && Math.sign(realDiff) === Math.sign(predDiff);
 
         if (isExact) exactCount++;
         if (isOutcome) outcomeCount++;
-        
+
         totalPoints += pred.points;
 
         return {
