@@ -103,7 +103,7 @@ export default function AdminPage() {
     setRefreshing(true);
     try {
       // Fetch players and games
-      const [playersRes, gamesRes] = await Promise.all([
+      const [ranking, playersRes, gamesRes] = await Promise.all([
         fetch('/api/ranking'), // ranking includes basic list, but wait, ranking excludes UIDs!
         // To manage players, we need UIDs to generate links!
         // Let's check: we need player UIDs. We can write a special endpoint or modify ranking / users.
@@ -133,8 +133,8 @@ export default function AdminPage() {
       const scoresMap: typeof editScores = {};
       gamesData.forEach((game: Game) => {
         scoresMap[game.id] = {
-          goalsA: game.goalsA !== null ? game.goalsA.toString() : '',
-          goalsB: game.goalsB !== null ? game.goalsB.toString() : '',
+          goalsA: game.goalsA != null ? String(game.goalsA) : '',
+          goalsB: game.goalsB != null ? String(game.goalsB) : '',
           status: game.status
         };
       });
@@ -320,14 +320,14 @@ export default function AdminPage() {
   }
 
   // Group filter list (Group A to L)
-  const groupNames = Array.from(new Set(games.filter(g => g.stage.startsWith('Grupo')).map(g => g.stage))).sort();
+  const groupNames = Array.from(new Set(games.filter(g => g.stage?.startsWith('Grupo')).map(g => g.stage))).sort();
 
   // Filter games based on current active tab and active group
   const filteredGames = games.filter(game => {
     if (gameTab === 'grupo') {
       return game.stage === activeGroup;
     } else {
-      return !game.stage.startsWith('Grupo');
+      return !game.stage?.startsWith('Grupo');
     }
   });
 
@@ -366,9 +366,8 @@ export default function AdminPage() {
       <div className="flex border-b border-emerald-950/60 gap-6">
         <button
           onClick={() => setAdminTab('jogadores')}
-          className={`pb-3 text-base font-bold transition-all relative ${
-            adminTab === 'jogadores' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-          }`}
+          className={`pb-3 text-base font-bold transition-all relative ${adminTab === 'jogadores' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+            }`}
         >
           Gerenciar Jogadores
           {adminTab === 'jogadores' && (
@@ -377,9 +376,8 @@ export default function AdminPage() {
         </button>
         <button
           onClick={() => setAdminTab('jogos')}
-          className={`pb-3 text-base font-bold transition-all relative ${
-            adminTab === 'jogos' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-          }`}
+          className={`pb-3 text-base font-bold transition-all relative ${adminTab === 'jogos' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+            }`}
         >
           Lançar Resultados
           {adminTab === 'jogos' && (
@@ -489,9 +487,8 @@ export default function AdminPage() {
             <div className="flex border-b border-emerald-950/60 gap-4">
               <button
                 onClick={() => setGameTab('grupo')}
-                className={`pb-3 text-sm font-bold transition-all relative ${
-                  gameTab === 'grupo' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-                }`}
+                className={`pb-3 text-sm font-bold transition-all relative ${gameTab === 'grupo' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+                  }`}
               >
                 Fase de Grupos
                 {gameTab === 'grupo' && (
@@ -500,9 +497,8 @@ export default function AdminPage() {
               </button>
               <button
                 onClick={() => setGameTab('matamata')}
-                className={`pb-3 text-sm font-bold transition-all relative ${
-                  gameTab === 'matamata' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-                }`}
+                className={`pb-3 text-sm font-bold transition-all relative ${gameTab === 'matamata' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+                  }`}
               >
                 Mata-Mata
                 {gameTab === 'matamata' && (
@@ -518,11 +514,10 @@ export default function AdminPage() {
                   <button
                     key={groupName}
                     onClick={() => setActiveGroup(groupName)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
-                      activeGroup === groupName
-                        ? 'bg-emerald-500 text-black border-emerald-500 shadow-md shadow-emerald-500/10'
-                        : 'bg-emerald-950/40 text-slate-400 border-emerald-900/30 hover:text-white hover:bg-emerald-950/80'
-                    }`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${activeGroup === groupName
+                      ? 'bg-emerald-500 text-black border-emerald-500 shadow-md shadow-emerald-500/10'
+                      : 'bg-emerald-950/40 text-slate-400 border-emerald-900/30 hover:text-white hover:bg-emerald-950/80'
+                      }`}
                   >
                     {groupName}
                   </button>
@@ -555,13 +550,12 @@ export default function AdminPage() {
                 return (
                   <div
                     key={game.id}
-                    className={`glass-panel rounded-2xl p-5 border flex flex-col justify-between shadow-xl transition-all duration-300 ${
-                      edit.status === 'finished'
-                        ? 'border-emerald-500/20 bg-emerald-500/[0.01]'
-                        : edit.status === 'live'
+                    className={`glass-panel rounded-2xl p-5 border flex flex-col justify-between shadow-xl transition-all duration-300 ${edit.status === 'finished'
+                      ? 'border-emerald-500/20 bg-emerald-500/[0.01]'
+                      : edit.status === 'live'
                         ? 'border-amber-500/20 bg-amber-500/[0.01]'
                         : 'border-emerald-950/60 bg-black/25'
-                    }`}
+                      }`}
                   >
                     {/* Collapsible card header */}
                     <div className="flex items-center justify-between border-b border-emerald-950/45 pb-3 mb-4">
@@ -633,15 +627,14 @@ export default function AdminPage() {
                             <button
                               key={st}
                               onClick={() => handleGameStatusChange(game.id, st)}
-                              className={`px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
-                                active
-                                  ? st === 'finished'
-                                    ? 'bg-emerald-500 text-black'
-                                    : st === 'live'
+                              className={`px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${active
+                                ? st === 'finished'
+                                  ? 'bg-emerald-500 text-black'
+                                  : st === 'live'
                                     ? 'bg-red-500 text-white animate-pulse'
                                     : 'bg-slate-800 text-white'
-                                  : 'text-slate-500 hover:text-slate-350'
-                              }`}
+                                : 'text-slate-500 hover:text-slate-350'
+                                }`}
                             >
                               {name}
                             </button>

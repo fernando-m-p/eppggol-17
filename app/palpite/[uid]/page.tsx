@@ -37,16 +37,16 @@ interface Player {
 
 export default function PlayerPalpitePage() {
   const params = useParams();
-  const uid = params.uid as string;
+  const uid = Array.isArray(params.uid) ? params.uid[0] : params.uid;
 
   const [player, setPlayer] = useState<Player | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<{ [gameId: number]: 'idle' | 'saving' | 'saved' | 'error' }>({});
-  
+
   // Local state for predictions: gameId -> { goalsA, goalsB }
   const [localPreds, setLocalPreds] = useState<{ [gameId: number]: { goalsA: string; goalsB: string } }>({});
-  
+
   // Filter stage state: "Grupo" or "Mata-Mata"
   const [activeTab, setActiveTab] = useState<'grupo' | 'matamata'>('grupo');
   // Selected sub-group filter (A to L)
@@ -71,7 +71,7 @@ export default function PlayerPalpitePage() {
 
       // Populate local predictions map
       const predsMap: { [gameId: number]: { goalsA: string; goalsB: string } } = {};
-      playerData.predictions.forEach((pred: Prediction) => {
+      (playerData.predictions ?? []).forEach((pred: Prediction) => {
         predsMap[pred.gameId] = {
           goalsA: pred.goalsA.toString(),
           goalsB: pred.goalsB.toString()
@@ -101,9 +101,9 @@ export default function PlayerPalpitePage() {
   // Debounced/Triggered save function
   const savePrediction = async (gameId: number, goalsAStr: string, goalsBStr: string) => {
     if (goalsAStr === '' || goalsBStr === '') return;
-    
+
     setSaveStatus(prev => ({ ...prev, [gameId]: 'saving' }));
-    
+
     try {
       const res = await fetch('/api/palpites', {
         method: 'POST',
@@ -188,13 +188,13 @@ export default function PlayerPalpitePage() {
   }
 
   // Calculate stats
-  const totalPoints = player.predictions.reduce((acc, pred) => acc + pred.points, 0);
+  const totalPoints = player.predictions.reduce((acc, pred) => acc + (pred.points ?? 0), 0);
 
   // Group filter list (Group A to L)
-  const groupNames = Array.from(new Set(games.filter(g => g.stage.startsWith('Grupo')).map(g => g.stage))).sort();
+  const groupNames = Array.from(new Set(games.filter(g => (g.stage ?? '').startsWith('Grupo')).map(g => g.stage))).sort();
 
   // Filter games based on current active tab and active group
-  const filteredGames = games.filter(game => {
+  const filteredGames = (games ?? []).filter(game => {
     if (activeTab === 'grupo') {
       return game.stage === activeGroup;
     } else {
@@ -234,9 +234,8 @@ export default function PlayerPalpitePage() {
         <div className="flex border-b border-emerald-950/60 gap-4">
           <button
             onClick={() => setActiveTab('grupo')}
-            className={`pb-3 text-base font-bold transition-all relative ${
-              activeTab === 'grupo' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-            }`}
+            className={`pb-3 text-base font-bold transition-all relative ${activeTab === 'grupo' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+              }`}
           >
             Fase de Grupos
             {activeTab === 'grupo' && (
@@ -245,9 +244,8 @@ export default function PlayerPalpitePage() {
           </button>
           <button
             onClick={() => setActiveTab('matamata')}
-            className={`pb-3 text-base font-bold transition-all relative ${
-              activeTab === 'matamata' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-            }`}
+            className={`pb-3 text-base font-bold transition-all relative ${activeTab === 'matamata' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+              }`}
           >
             Fase Eliminatória (Mata-Mata)
             {activeTab === 'matamata' && (
@@ -263,11 +261,10 @@ export default function PlayerPalpitePage() {
               <button
                 key={groupName}
                 onClick={() => setActiveGroup(groupName)}
-                className={`px-3.y py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
-                  activeGroup === groupName
-                    ? 'bg-emerald-500 text-black border-emerald-500 shadow-md shadow-emerald-500/10'
-                    : 'bg-emerald-950/40 text-slate-400 border-emerald-900/30 hover:text-white hover:bg-emerald-950/80'
-                }`}
+                className={`px-3.y py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${activeGroup === groupName
+                  ? 'bg-emerald-500 text-black border-emerald-500 shadow-md shadow-emerald-500/10'
+                  : 'bg-emerald-950/40 text-slate-400 border-emerald-900/30 hover:text-white hover:bg-emerald-950/80'
+                  }`}
               >
                 {groupName}
               </button>
@@ -286,27 +283,26 @@ export default function PlayerPalpitePage() {
           filteredGames.map(game => {
             const locked = isLocked(game.date);
             const isFinished = game.status === 'finished';
-            
+
             // Get prediction points
             const dbPred = player.predictions.find(p => p.gameId === game.id);
             const status = saveStatus[game.id] || 'idle';
-            
+
             const pred = localPreds[game.id] || { goalsA: '', goalsB: '' };
 
             return (
               <div
                 key={game.id}
-                className={`glass-panel rounded-2xl p-5 border flex flex-col justify-between shadow-xl relative overflow-hidden transition-all duration-300 ${
-                  isFinished
-                    ? dbPred?.points && dbPred.points > 1
-                      ? 'border-amber-500/20 bg-amber-500/[0.01]'
-                      : dbPred?.points && dbPred.points === 1
+                className={`glass-panel rounded-2xl p-5 border flex flex-col justify-between shadow-xl relative overflow-hidden transition-all duration-300 ${isFinished
+                  ? dbPred?.points && dbPred.points > 1
+                    ? 'border-amber-500/20 bg-amber-500/[0.01]'
+                    : dbPred?.points && dbPred.points === 1
                       ? 'border-emerald-500/20 bg-emerald-500/[0.01]'
                       : 'border-slate-800 bg-black/10'
-                    : locked
+                  : locked
                     ? 'border-slate-900/60 bg-black/10'
                     : 'border-emerald-950 hover:border-emerald-800/40 bg-black/20'
-                }`}
+                  }`}
               >
                 {/* Top Info Header */}
                 <div className="flex items-center justify-between border-b border-emerald-950/40 pb-3 mb-4">
@@ -315,7 +311,7 @@ export default function PlayerPalpitePage() {
                       {game.stage}
                     </span>
                     <span className="text-[10px] text-slate-500 truncate max-w-[180px]">
-                      📍 {game.stadium.split('(')[0]}
+                      📍 {(game.stadium ?? '').split('(')[0]}
                     </span>
                   </div>
 
@@ -396,13 +392,12 @@ export default function PlayerPalpitePage() {
                         <span className="text-[11px] font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded">
                           Placar Real: {game.goalsA} x {game.goalsB}
                         </span>
-                        <span className={`font-black px-2 py-0.5 rounded text-xs ${
-                          dbPred?.points && dbPred.points > 1
-                            ? 'bg-amber-500/20 text-amber-400'
-                            : dbPred?.points && dbPred.points === 1
+                        <span className={`font-black px-2 py-0.5 rounded text-xs ${dbPred?.points && dbPred.points > 1
+                          ? 'bg-amber-500/20 text-amber-400'
+                          : dbPred?.points && dbPred.points === 1
                             ? 'bg-emerald-500/20 text-emerald-400'
                             : 'bg-slate-900 text-slate-500'
-                        }`}>
+                          }`}>
                           +{dbPred?.points || 0} pts
                         </span>
                       </div>
