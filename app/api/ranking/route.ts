@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -13,12 +13,12 @@ export async function GET() {
       }
     });
 
-    const ranking = players.map((player) => {
+    const ranking = players.map((player: { predictions: any[]; id: any; name: any; }) => {
       let totalPoints = 0;
       let exactCount = 0;
       let outcomeCount = 0;
 
-      const predictionsDetail = player.predictions.map((pred) => {
+      const predictionsDetail = player.predictions.map((pred: { game: { status: string; goalsA: number | null; goalsB: number | null; }; goalsA: number; goalsB: number; points: number; gameId: any; }) => {
         const isFinished = pred.game.status === 'finished';
         const isExact = isFinished && pred.goalsA === pred.game.goalsA && pred.goalsB === pred.game.goalsB;
 
@@ -54,7 +54,7 @@ export async function GET() {
     });
 
     // Sort by points (desc), then exactCount (desc), then name (asc)
-    ranking.sort((a, b) => {
+    ranking.sort((a: { totalPoints: number; exactCount: number; name: string; }, b: { totalPoints: number; exactCount: number; name: any; }) => {
       if (b.totalPoints !== a.totalPoints) {
         return b.totalPoints - a.totalPoints;
       }

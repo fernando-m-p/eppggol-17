@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { isMatchLocked } from '@/lib/lock';
 
 export async function POST(request: Request) {

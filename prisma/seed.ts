@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 const STADIUMS = [
   'MetLife Stadium (New York/New Jersey)',  //0
@@ -134,9 +133,10 @@ const GROUPS = [
 
 async function main() {
   console.log('Limpando banco de dados...');
-  await prisma.prediction.deleteMany();
-  await prisma.game.deleteMany();
-  await prisma.player.deleteMany();
+
+  //await prisma.prediction.deleteMany();
+  //await prisma.game.deleteMany();
+  //await prisma.player.deleteMany();
 
   console.log('Semeando jogos da fase de grupos...');
   let gameCount = 0;
