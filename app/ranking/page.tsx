@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Award, Eye, Calendar, Lock, Unlock, Trophy, CheckCircle, RefreshCw } from 'lucide-react';
+import { FinalPrediction } from '@prisma/client';
 
 interface Game {
   id: number;
@@ -35,6 +36,8 @@ interface PlayerRanking {
   exactCount: number;
   outcomeCount: number;
   predictions: PlayerPrediction[];
+  finalPredictions: FinalPrediction[];
+
 }
 
 export default function RankingPage() {
@@ -279,6 +282,33 @@ export default function RankingPage() {
 
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {selectedPlayer.finalPredictions.length === 0 ? "" :
+                <div className="flex-1 p-6 space-y-4">
+                  <h2 >Palpites dos Campeões</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className='flex flex-col p-4 rounded-xl border border-emerald-950/60 bg-black/20'>
+                      <p className='flex gap-8'><label>
+                        Campeão:
+                      </label>
+                        {selectedPlayer.finalPredictions[0].campeao}
+                      </p>
+                    </div>
+                    <div className='flex flex-col p-4 rounded-xl border border-emerald-950/60 bg-black/20'>
+                      <p className='flex gap-8'><label>
+                        Vice:
+                      </label>
+                        {selectedPlayer.finalPredictions[0].segundo}
+                      </p></div>
+                    <div className='flex flex-col p-4 rounded-xl border border-emerald-950/60 bg-black/20'>
+                      <p className='flex gap-8'><label>
+                        3º Colocado:
+                      </label>
+                        {selectedPlayer.finalPredictions[0].terceiro}
+                      </p></div>
+
+                  </div>
+
+                </div>}
               {games.length === 0 ? (
                 <p className="text-center text-slate-500 py-8">Nenhum jogo encontrado no sistema.</p>
               ) : (
