@@ -52,7 +52,7 @@ export default function RankingPage() {
       ]);
       const rankingData = await rankingRes.json();
       const gamesData = await gamesRes.json();
-      
+
       setRanking(Array.isArray(rankingData) ? rankingData : []);
       setGames(Array.isArray(gamesData) ? gamesData : []);
     } catch (e) {
@@ -104,8 +104,8 @@ export default function RankingPage() {
 
   // Re-order podium for layout visual flow: 2nd place (left), 1st place (center), 3rd place (right)
   const sortedPodium = [];
-  if (podium[1]) sortedPodium.push({ player: podium[1], rank: 2 });
   if (podium[0]) sortedPodium.push({ player: podium[0], rank: 1 });
+  if (podium[1]) sortedPodium.push({ player: podium[1], rank: 2 });
   if (podium[2]) sortedPodium.push({ player: podium[2], rank: 3 });
 
   return (
@@ -146,7 +146,7 @@ export default function RankingPage() {
           {/* Top 3 Podium Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end max-w-4xl mx-auto px-4">
             {sortedPodium.map(({ player, rank }) => {
-              const heightClass = rank === 1 ? 'md:h-64 border-amber-500/40 bg-amber-950/10' : rank === 2 ? 'md:h-56 border-slate-400/30 bg-slate-900/10' : 'md:h-48 border-amber-750/30 bg-amber-950/5';
+              const heightClass = rank === 1 ? ' border-amber-500/40 bg-amber-950/10' : rank === 2 ? ' border-slate-400/30 bg-slate-900/10' : ' border-amber-750/30 bg-amber-950/5';
               const medalColor = rank === 1 ? 'bg-amber-500 text-black shadow-amber-500/30' : rank === 2 ? 'bg-slate-400 text-black shadow-slate-450/20' : 'bg-amber-700 text-white shadow-amber-800/20';
               const rankName = rank === 1 ? '1º Lugar' : rank === 2 ? '2º Lugar' : '3º Lugar';
 
@@ -199,7 +199,7 @@ export default function RankingPage() {
             <div className="px-6 py-4 border-b border-emerald-950/60 bg-emerald-950/20">
               <h2 className="text-lg font-bold text-white">Líderes e Classificados</h2>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -218,16 +218,14 @@ export default function RankingPage() {
                     return (
                       <tr
                         key={player.id}
-                        className={`hover:bg-emerald-950/10 transition-colors ${
-                          isTop3 ? 'bg-emerald-950/5' : ''
-                        }`}
+                        className={`hover:bg-emerald-950/10 transition-colors ${isTop3 ? 'bg-emerald-950/5' : ''
+                          }`}
                       >
                         <td className="py-4 px-6 text-center font-bold text-sm">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs ${
-                            idx === 0 ? 'bg-amber-500/20 text-amber-400' :
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs ${idx === 0 ? 'bg-amber-500/20 text-amber-400' :
                             idx === 1 ? 'bg-slate-400/20 text-slate-350' :
-                            idx === 2 ? 'bg-amber-700/25 text-amber-600' : 'text-slate-400'
-                          }`}>
+                              idx === 2 ? 'bg-amber-700/25 text-amber-600' : 'text-slate-400'
+                            }`}>
                             {idx + 1}
                           </span>
                         </td>
@@ -293,15 +291,14 @@ export default function RankingPage() {
                     return (
                       <div
                         key={game.id}
-                        className={`flex flex-col p-4 rounded-xl border ${
-                          isFinished
-                            ? prediction?.isExact
-                              ? 'border-amber-500/20 bg-amber-500/[0.02]'
-                              : prediction?.isOutcome
+                        className={`flex flex-col p-4 rounded-xl border ${isFinished
+                          ? prediction?.isExact
+                            ? 'border-amber-500/20 bg-amber-500/[0.02]'
+                            : prediction?.isOutcome
                               ? 'border-emerald-500/20 bg-emerald-500/[0.01]'
                               : 'border-slate-800/40 bg-black/10'
-                            : 'border-emerald-950/60 bg-black/20'
-                        }`}
+                          : 'border-emerald-950/60 bg-black/20'
+                          }`}
                       >
                         {/* Phase & Stadium */}
                         <div className="flex items-center justify-between text-[10px] text-slate-400 font-semibold mb-2">
@@ -355,13 +352,12 @@ export default function RankingPage() {
                                 <CheckCircle className="w-3 h-3 text-emerald-500" />
                                 Real: {game.goalsA} x {game.goalsB}
                               </span>
-                              <span className={`font-black px-2 py-0.5 rounded ${
-                                prediction?.isExact 
-                                  ? 'bg-amber-500/20 text-amber-400' 
-                                  : prediction?.isOutcome 
-                                  ? 'bg-emerald-500/20 text-emerald-400' 
+                              <span className={`font-black px-2 py-0.5 rounded ${prediction?.isExact
+                                ? 'bg-amber-500/20 text-amber-400'
+                                : prediction?.isOutcome
+                                  ? 'bg-emerald-500/20 text-emerald-400'
                                   : 'bg-slate-900 text-slate-500'
-                              }`}>
+                                }`}>
                                 +{prediction?.points || 0} pts
                               </span>
                             </>

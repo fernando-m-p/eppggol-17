@@ -9,15 +9,16 @@ export async function GET() {
           include: {
             game: true
           }
-        }
+        },
+        finalPredictions: true
       }
     });
 
-    const ranking = players.map((player: { predictions: any[]; id: any; name: any; }) => {
+    const ranking = players.map((player: { predictions: any[]; id: any; name: any; finalPredictions: any[]; }) => {
       let totalPoints = 0;
       let exactCount = 0;
       let outcomeCount = 0;
-
+      const campeaoPredictionDetail = player.finalPredictions;
       const predictionsDetail = player.predictions.map((pred: { game: { status: string; goalsA: number | null; goalsB: number | null; }; goalsA: number; goalsB: number; points: number; gameId: any; }) => {
         const isFinished = pred.game.status === 'finished';
         const isExact = isFinished && pred.goalsA === pred.game.goalsA && pred.goalsB === pred.game.goalsB;
@@ -42,14 +43,15 @@ export async function GET() {
           isOutcome
         };
       });
-
+      totalPoints += player.finalPredictions[0]?.points ?? 0;
       return {
         id: player.id,
         name: player.name,
         totalPoints,
         exactCount,
         outcomeCount,
-        predictions: predictionsDetail
+        predictions: predictionsDetail,
+        finalPredictions: campeaoPredictionDetail
       };
     });
 

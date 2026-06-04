@@ -32,6 +32,7 @@ model Player {
   uid         String       @unique @default(uuid())
   name        String
   predictions Prediction[]
+  finalPredictions  FinalPrediction[]
 }
 
 model Prediction {
@@ -46,3 +47,21 @@ model Prediction {
 
   @@unique([playerId, gameId])
 }
+
+model FinalPrediction {
+  id        Int @id @default(autoincrement())
+  playerId  Int
+  player    Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  campeao   String
+  segundo   String
+  terceiro  String
+
+  points Int @default(0)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([playerId])
+}
+

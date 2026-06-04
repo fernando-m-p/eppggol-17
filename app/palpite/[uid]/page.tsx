@@ -19,6 +19,14 @@ interface Game {
   goalsB: number | null;
   status: string;
 }
+interface FinalPrediction {
+  id: number;
+  uid: string;
+  campeao: string;
+  segundo: string;
+  terceiro: string;
+  points: number;
+}
 
 interface Prediction {
   id: number;
@@ -33,6 +41,7 @@ interface Player {
   uid: string;
   name: string;
   predictions: Prediction[];
+  finalPredictions: FinalPrediction[];
 }
 
 export default function PlayerPalpitePage() {
@@ -41,11 +50,19 @@ export default function PlayerPalpitePage() {
 
   const [player, setPlayer] = useState<Player | null>(null);
   const [games, setGames] = useState<Game[]>([]);
+  const [teams, setTeams] = useState<string[]>([]);
+  const [finalPredictions, setFinalPredictions] = useState<FinalPrediction | null>(null);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<{ [gameId: number]: 'idle' | 'saving' | 'saved' | 'error' }>({});
+  const [saveCampStatus, setSaveCampStatus] = useState<{ [uid: string]: 'idle' | 'saving' | 'saved' | 'error' }>({});
 
   // Local state for predictions: gameId -> { goalsA, goalsB }
   const [localPreds, setLocalPreds] = useState<{ [gameId: number]: { goalsA: string; goalsB: string } }>({});
+  // Local state for predictions: uid -> { campeao, segundo, terceiro }
+  const [localCampPreds, setLocalCampPreds] = useState<{ [uid: string]: { campeao: string, segundo: string, terceiro: string } }>({});
+  const [localCampeaoPreds, setLocalCampeaoPreds] = useState<{ [uid: string]: { campeao: string } }>({});
+  const [localSegundoPreds, setLocalSegundoPreds] = useState<{ [uid: string]: { segundo: string } }>({});
+  const [localTerceiroPreds, setLocalTerceiroPreds] = useState<{ [uid: string]: { terceiro: string } }>({});
 
   // Filter stage state: "Grupo" or "Mata-Mata"
   const [activeTab, setActiveTab] = useState<'grupo' | 'matamata'>('grupo');
@@ -54,9 +71,10 @@ export default function PlayerPalpitePage() {
 
   const fetchData = async () => {
     try {
-      const [playerRes, gamesRes] = await Promise.all([
+      const [playerRes, gamesRes, teamsRes] = await Promise.all([
         fetch(`/api/users?uid=${uid}`),
-        fetch('/api/games')
+        fetch('/api/games'),
+        fetch('/api/teams'),
       ]);
 
       if (!playerRes.ok) {
@@ -65,10 +83,10 @@ export default function PlayerPalpitePage() {
 
       const playerData = await playerRes.json();
       const gamesData = await gamesRes.json();
-
+      const teamsData = await teamsRes.json();
       setPlayer(playerData);
       setGames(Array.isArray(gamesData) ? gamesData : []);
-
+      setTeams(teamsData);
       // Populate local predictions map
       const predsMap: { [gameId: number]: { goalsA: string; goalsB: string } } = {};
       (playerData.predictions ?? []).forEach((pred: Prediction) => {
@@ -78,6 +96,16 @@ export default function PlayerPalpitePage() {
         };
       });
       setLocalPreds(predsMap);
+
+      const preadsCMap: { [uid: string]: { campeao: string, segundo: string, terceiro: string } } = {};
+      (playerData.finalPredictions ?? []).forEach((predC: FinalPrediction) => {
+        preadsCMap[playerData.uid] = {
+          campeao: predC.campeao,
+          segundo: predC.segundo,
+          terceiro: predC.terceiro,
+        }
+      })
+      setLocalCampPreds(preadsCMap);
     } catch (e) {
       console.error(e);
     } finally {
@@ -131,6 +159,41 @@ export default function PlayerPalpitePage() {
     }
   };
 
+  // Debounced/Triggered save function
+  const saveCampPrediction = async (uid: string, campeao: string, segundo: string, terceiro: string) => {
+    // if (campeao === '' || segundo === '' || terceiro === '') return;
+
+    setSaveCampStatus(prev => ({ ...prev, [uid]: 'saving' }));
+    console.log(uid, campeao, segundo, terceiro);
+    try {
+      const res = await fetch('/api/campeoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid,
+          campeao,
+          segundo,
+          terceiro
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Erro ao salvar palpite');
+      }
+
+      setSaveCampStatus(prev => ({ ...prev, [uid]: 'saved' }));
+      // Transition back to idle after 2 seconds
+      setTimeout(() => {
+        setSaveCampStatus(prev => ({ ...prev, [uid]: 'idle' }));
+      }, 2000);
+    } catch (e) {
+      console.error(e);
+      setSaveCampStatus(prev => ({ ...prev, [uid]: 'error' }));
+    }
+  };
+
+
+
   const handleInputChange = (gameId: number, team: 'A' | 'B', value: string) => {
     // Only allow numbers or empty string
     if (value !== '' && !/^\d+$/.test(value)) return;
@@ -151,6 +214,52 @@ export default function PlayerPalpitePage() {
       return {
         ...prev,
         [gameId]: updated
+      };
+    });
+  };
+
+  const handleCampeaoChange = (uid: string, campeao: string) => {
+    // Only allow numbers or empty string
+    console.log(uid, campeao);
+    setLocalCampPreds(prev => {
+      const current = prev[uid] || { campeao: '' };
+      const updated = {
+        ...current,
+        campeao: campeao
+      };
+
+      // Auto-save if both fields have values
+      if (updated.campeao !== '') {
+        saveCampPrediction(uid, updated.campeao, finalPredictions?.segundo ?? "", finalPredictions?.terceiro ?? "");
+      }
+
+      return {
+        ...prev,
+        [uid]: updated
+      };
+    });
+  };
+
+  const handleCampChange = (uid: string, campeao: string, segundo: string, terceiro: string) => {
+    // Only allow numbers or empty string
+    console.log(uid, campeao, segundo, terceiro);
+    setLocalCampPreds(prev => {
+      const current = prev[uid] || { campeao: '', segundo: '', terceiro: '' };
+      const updated = {
+        ...current,
+        campeao: campeao,
+        segundo: segundo,
+        terceiro: terceiro
+      };
+
+      // Auto-save if both fields have values
+      if (updated.campeao !== '' || updated.segundo !== '' || updated.terceiro !== '') {
+        saveCampPrediction(uid, updated.campeao, updated.segundo, updated.terceiro);
+      }
+
+      return {
+        ...prev,
+        [uid]: updated
       };
     });
   };
@@ -188,7 +297,7 @@ export default function PlayerPalpitePage() {
   }
 
   // Calculate stats
-  const totalPoints = player.predictions.reduce((acc, pred) => acc + (pred.points ?? 0), 0);
+  const totalPoints = player.predictions.reduce((acc, pred) => acc + (pred.points ?? 0), 0) + player.finalPredictions.reduce((acc, pred) => acc + (pred.points ?? 0), 0);
 
   // Group filter list (Group A to L)
   const groupNames = Array.from(new Set(games.filter(g => (g.stage ?? '').startsWith('Grupo')).map(g => g.stage))).sort();
@@ -201,6 +310,9 @@ export default function PlayerPalpitePage() {
       return !game.stage.startsWith('Grupo');
     }
   });
+
+  console.log("uid:", uid);
+  console.log("state:", localCampPreds);
 
   return (
     <div className="space-y-8">
@@ -227,6 +339,106 @@ export default function PlayerPalpitePage() {
             <span className="text-2xl font-black text-white">{totalPoints} <span className="text-xs font-bold text-slate-400">pts</span></span>
           </div>
         </div>
+      </div>
+      <div className="glass-panel rounded-2xl p-6 sm:p-8 flex flex-col gap-6 border border-emerald-950/60 shadow-2xl relative overflow-hidden">
+
+        <div>
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-800/30">
+            Palpites dos campeões
+          </span>
+          <div className="flex gap-4 flex-col sm:flex-row items-start text-slate-400 text-xs mt-1">
+
+            {/* Campeão */}
+            <div className="flex w-full flex-col items-center gap-1">
+              <label className="text-[10px] font-bold text-slate-400">
+                Campeão
+              </label>
+              <select
+                value={localCampPreds[uid ?? ""]?.campeao ?? ""}
+                onChange={(e) =>
+                  handleCampChange(
+                    uid ?? "",
+                    e.target.value,
+                    localCampPreds[uid ?? ""]?.segundo ?? "",
+                    localCampPreds[uid ?? ""]?.terceiro ?? ""
+                  )
+                }
+                className="w-full md:w-40 h-10 rounded-xl bg-emerald-950/30 border border-emerald-900/60 text-white text-center font-bold focus:outline-none focus:border-emerald-500"
+              >
+                <option value="" disabled>
+                  Selecione
+                </option>
+
+                {teams.map((team) => (
+                  <option key={team} value={team}>
+                    {team}
+                  </option>
+                ))}
+              </select>
+
+            </div>
+
+            {/* Segundo Lugar */}
+            <div className="flex w-full flex-col items-center gap-1">
+              <label className="text-[10px] font-bold text-slate-400">
+                Segundo Lugar
+              </label>
+              <select
+                value={localCampPreds[uid ?? ""]?.segundo ?? ""}
+                onChange={(e) =>
+                  handleCampChange(
+                    uid ?? "",
+                    localCampPreds[uid ?? ""]?.campeao ?? "",
+                    e.target.value,
+                    localCampPreds[uid ?? ""]?.terceiro ?? ""
+                  )
+                }
+                className="w-full md:w-40 h-10 rounded-xl bg-emerald-950/30 border border-emerald-900/60 text-white text-center font-bold focus:outline-none focus:border-emerald-500"
+              >
+                <option value="" disabled>
+                  Selecione
+                </option>
+
+                {teams.map((team) => (
+                  <option key={team} value={team}>
+                    {team}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Terceiro Lugar */}
+            <div className="flex w-full flex-col items-center gap-1">
+              <label className=" text-[10px] font-bold text-slate-400">
+                Terceiro Lugar
+              </label>
+              <select
+                value={localCampPreds[uid ?? ""]?.terceiro ?? ""}
+                onChange={(e) =>
+                  handleCampChange(
+                    uid ?? "",
+                    localCampPreds[uid ?? ""]?.campeao ?? "",
+                    localCampPreds[uid ?? ""]?.segundo ?? "",
+                    e.target.value,
+                  )
+                }
+                className="w-full md:w-40 h-10 rounded-xl bg-emerald-950/30 border border-emerald-900/60 text-white text-center font-bold focus:outline-none focus:border-emerald-500"
+              >
+                <option value="" disabled>
+                  Selecione
+                </option>
+
+                {teams.map((team) => (
+                  <option key={team} value={team}>
+                    {team}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
       {/* Tabs */}
@@ -381,11 +593,21 @@ export default function PlayerPalpitePage() {
 
                 {/* Footer Info / Autosave / Result */}
                 <div className="mt-4 flex items-center justify-between text-xs border-t border-emerald-950/30 pt-3">
-                  <div className="text-[10px] text-slate-550 flex items-center gap-1">
+                  <div className="w-33 text-[10px] text-slate-550 flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     {formatDateTime(game.date)}
                   </div>
 
+                  <button
+                    onClick={(e) => {
+                      handleInputChange(game.id, 'B', Math.floor(Math.random() * 6).toString())
+                      handleInputChange(game.id, 'A', Math.floor(Math.random() * 6).toString())
+                    }}
+                    className="w-33 px-4 py-2 rounded-xl bg-emerald-700 text-white font-bold"
+                  >
+                    🎲 Aleatório
+                  </button>
+                  <div></div>
                   <div>
                     {isFinished ? (
                       <div className="flex items-center gap-2">
@@ -427,6 +649,6 @@ export default function PlayerPalpitePage() {
           })
         )}
       </div>
-    </div>
+    </div >
   );
 }

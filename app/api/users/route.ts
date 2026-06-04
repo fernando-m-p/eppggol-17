@@ -27,7 +27,8 @@ export async function GET(request: Request) {
     const player = await prisma.player.findUnique({
       where: { uid },
       include: {
-        predictions: true
+        predictions: true,
+        finalPredictions: true
       }
     });
 

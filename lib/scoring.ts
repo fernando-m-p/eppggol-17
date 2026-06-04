@@ -36,9 +36,9 @@ export function calculatePoints(
 
 export function getPhaseWeight(stage: string): number {
   const norm = stage.toLowerCase().trim();
-  
+
   if (norm.includes('final') && !norm.includes('semi') && !norm.includes('quarta') && !norm.includes('oitava')) {
-    return 10;
+    return 5;
   }
   if (norm.includes('semi')) {
     return 5;
@@ -47,15 +47,15 @@ export function getPhaseWeight(stage: string): number {
     return 5;
   }
   if (norm.includes('quarta') || norm.includes('quarter')) {
-    return 4;
-  }
-  if (norm.includes('oitava') || norm.includes('16') || norm.includes('octava')) {
     return 3;
   }
-  if (norm.includes('32-avos') || norm.includes('32avos') || norm.includes('32')) {
+  if (norm.includes('oitava') || norm.includes('16') || norm.includes('octava')) {
     return 2;
   }
-  
+  if (norm.includes('32-avos') || norm.includes('32avos') || norm.includes('32')) {
+    return 1.5;
+  }
+
   // Default is Group Stage (Grupo)
   return 1;
 }

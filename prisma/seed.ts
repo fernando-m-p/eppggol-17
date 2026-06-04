@@ -1710,20 +1710,20 @@ async function main() {
 
 
   for (const km of allMatches) {
-    await prisma.game.create({
-      data: {
-        stadium: km.stadium,
-        stage: km.stage,
-        date: km.date,
-        teamA: km.teamA,
-        teamB: km.teamB,
-        flagA: km.flagA,
-        flagB: km.flagB,
-        abbrevA: km.abbrevA,
-        abbrevB: km.abbrevB,
-        status: 'scheduled'
-      }
-    });
+    // await prisma.game.create({
+    //   data: {
+    //     stadium: km.stadium,
+    //     stage: km.stage,
+    //     date: km.date,
+    //     teamA: km.teamA,
+    //     teamB: km.teamB,
+    //     flagA: km.flagA,
+    //     flagB: km.flagB,
+    //     abbrevA: km.abbrevA,
+    //     abbrevB: km.abbrevB,
+    //     status: 'scheduled'
+    //   }
+    // });
   }
 
   console.log('Semeados 6 jogos de mata-mata.');
