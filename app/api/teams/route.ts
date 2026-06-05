@@ -19,6 +19,7 @@ export async function GET() {
                 games.flatMap(g => [g.teamA, g.teamB])
             )
         ];
+        teams.sort((a, b) => a.localeCompare(b));
 
 
         return NextResponse.json(teams);
