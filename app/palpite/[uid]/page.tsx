@@ -144,7 +144,7 @@ export default function PlayerPalpitePage() {
       const seconds = Math.floor((diff / 1000) % 60);
 
       if (days > 0) {
-        return `${days}d ${hours}h ${minutes}m`;
+        return `${days}d ${hours}h ${minutes}m `;
       }
 
       if (hours > 0) {
@@ -603,12 +603,7 @@ export default function PlayerPalpitePage() {
                     <Calendar className="w-3.5 h-3.5" />
                     {formatDateTime(game.date)}
                     
-                    {!isFinished && (
-                        <span className="text-emerald-400 font-bold mt-1">
-                          ⏳ Palpite fecha em {getCountdown(game.date)}
-                        </span>
-                      )}
-
+                    
                   </div>
 
                   <button
@@ -656,6 +651,13 @@ export default function PlayerPalpitePage() {
                       </div>
                     )}
                   </div>
+                </div>
+                <div className="border-emerald-950/30 border-t flex items-center justify-center pt-3">
+                        {!isFinished && (
+                        <span className=".text-accent font-bold mt-1">
+                          ⏳ Palpite fecha em {getCountdown(game.date)}
+                        </span>
+                      )}
                 </div>
               </div>
             );
