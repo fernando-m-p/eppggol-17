@@ -445,7 +445,7 @@ export default function PlayerPalpitePage() {
             </div>
 
           </div>
-          <div className="flex gap-4 flex-col sm:flex-row items-start text-slate-400 text-xs mt-1">
+          <div className="flex flex-col gap-4 items-start justify-center mt-4 sm:flex-row text-2xl text-slate-400">
             <span className="text-accent font-bold mt-1">
                           ⏳ Palpite dos campeões fecha em {getCountdown(campDate)}
             </span>
