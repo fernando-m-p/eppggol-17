@@ -114,13 +114,16 @@ export default function PlayerPalpitePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
-    }, 1000);
+    }, 1000);    
+    return () => clearInterval(interval);
+  }, []);
 
+  useEffect(() => {
+   
     if (uid) {
       fetchData();
     }
     
-    return () => clearInterval(interval);
   }, [uid]);
 
   const isLocked = (kickoffDate: string) => {
@@ -129,7 +132,7 @@ export default function PlayerPalpitePage() {
     const tenMinutesInMs = 10 * 60 * 1000;
     return now >= (kickoff - tenMinutesInMs);
   };
-  const campDate = "2026-06-10T:00:00+00:00";
+  const campDate = "2026-06-10T19:00:00"; // Example date for championship prediction deadline
   const getCountdown = (dateStr: string) => {
       const target = new Date(dateStr).getTime() - (10 * 60 * 1000); // 10 minutes before kickoff;
       const diff = target - currentTime;
@@ -248,7 +251,6 @@ export default function PlayerPalpitePage() {
 
   const handleCampChange = (uid: string, campeao: string, segundo: string, terceiro: string) => {
     // Only allow numbers or empty string
-    console.log(uid, campeao, segundo, terceiro);
     setLocalCampPreds(prev => {
       const current = prev[uid] || { campeao: '', segundo: '', terceiro: '' };
       const updated = {
