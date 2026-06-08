@@ -129,7 +129,7 @@ export default function PlayerPalpitePage() {
     const tenMinutesInMs = 10 * 60 * 1000;
     return now >= (kickoff - tenMinutesInMs);
   };
-
+  const campDate = "2026-06-10T:00:00+00:00";
   const getCountdown = (dateStr: string) => {
       const target = new Date(dateStr).getTime() - (10 * 60 * 1000); // 10 minutes before kickoff;
       const diff = target - currentTime;
@@ -443,6 +443,11 @@ export default function PlayerPalpitePage() {
             </div>
 
           </div>
+          <div className="flex gap-4 flex-col sm:flex-row items-start text-slate-400 text-xs mt-1">
+            <span className="text-accent font-bold mt-1">
+                          ⏳ Palpite dos campeões fecha em {getCountdown(campDate)}
+            </span>
+          </div>
         </div>
 
       </div>
@@ -654,7 +659,7 @@ export default function PlayerPalpitePage() {
                 </div>
                 <div className="border-emerald-950/30 border-t flex items-center justify-center pt-3">
                         {!isFinished && (
-                        <span className=".text-accent font-bold mt-1">
+                        <span className="text-accent font-bold mt-1">
                           ⏳ Palpite fecha em {getCountdown(game.date)}
                         </span>
                       )}
