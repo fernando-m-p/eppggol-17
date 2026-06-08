@@ -147,7 +147,7 @@ export default function PlayerPalpitePage() {
       const seconds = Math.floor((diff / 1000) % 60);
 
       if (days > 0) {
-        return `${days}d ${hours}h ${minutes}m `;
+        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
       }
 
       if (hours > 0) {
@@ -195,7 +195,7 @@ export default function PlayerPalpitePage() {
     // if (campeao === '' || segundo === '' || terceiro === '') return;
 
     setSaveCampStatus(prev => ({ ...prev, [uid]: 'saving' }));
-    console.log(uid, campeao, segundo, terceiro);
+
     try {
       const res = await fetch('/api/campeoes', {
         method: 'POST',
@@ -319,8 +319,6 @@ export default function PlayerPalpitePage() {
     }
   });
 
-  console.log("uid:", uid);
-  console.log("state:", localCampPreds);
 
   return (
     <div className="space-y-8">
