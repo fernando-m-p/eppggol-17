@@ -51,18 +51,16 @@ export default function PlayerPalpitePage() {
   const [player, setPlayer] = useState<Player | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [teams, setTeams] = useState<string[]>([]);
-  const [finalPredictions, setFinalPredictions] = useState<FinalPrediction | null>(null);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<{ [gameId: number]: 'idle' | 'saving' | 'saved' | 'error' }>({});
   const [saveCampStatus, setSaveCampStatus] = useState<{ [uid: string]: 'idle' | 'saving' | 'saved' | 'error' }>({});
+  const [currentTime, setCurrentTime] = useState(Date.now());
 
   // Local state for predictions: gameId -> { goalsA, goalsB }
   const [localPreds, setLocalPreds] = useState<{ [gameId: number]: { goalsA: string; goalsB: string } }>({});
   // Local state for predictions: uid -> { campeao, segundo, terceiro }
   const [localCampPreds, setLocalCampPreds] = useState<{ [uid: string]: { campeao: string, segundo: string, terceiro: string } }>({});
-  const [localCampeaoPreds, setLocalCampeaoPreds] = useState<{ [uid: string]: { campeao: string } }>({});
-  const [localSegundoPreds, setLocalSegundoPreds] = useState<{ [uid: string]: { segundo: string } }>({});
-  const [localTerceiroPreds, setLocalTerceiroPreds] = useState<{ [uid: string]: { terceiro: string } }>({});
+
 
   // Filter stage state: "Grupo" or "Mata-Mata"
   const [activeTab, setActiveTab] = useState<'grupo' | 'matamata'>('grupo');
@@ -114,9 +112,18 @@ export default function PlayerPalpitePage() {
   };
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);    
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+   
     if (uid) {
       fetchData();
     }
+    
   }, [uid]);
 
   const isLocked = (kickoffDate: string) => {
@@ -124,6 +131,30 @@ export default function PlayerPalpitePage() {
     const now = Date.now();
     const tenMinutesInMs = 10 * 60 * 1000;
     return now >= (kickoff - tenMinutesInMs);
+  };
+  const campDate = "2026-06-10T19:00:00"; // Example date for championship prediction deadline
+  const getCountdown = (dateStr: string) => {
+      const target = new Date(dateStr).getTime() - (10 * 60 * 1000); // 10 minutes before kickoff;
+      const diff = target - currentTime;
+
+      if (diff <= 0) {
+        return 'Jogo iniciado';
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+      }
+
+      return `${minutes}m ${seconds}s`;
   };
 
   // Debounced/Triggered save function
@@ -164,7 +195,7 @@ export default function PlayerPalpitePage() {
     // if (campeao === '' || segundo === '' || terceiro === '') return;
 
     setSaveCampStatus(prev => ({ ...prev, [uid]: 'saving' }));
-    console.log(uid, campeao, segundo, terceiro);
+
     try {
       const res = await fetch('/api/campeoes', {
         method: 'POST',
@@ -218,31 +249,8 @@ export default function PlayerPalpitePage() {
     });
   };
 
-  const handleCampeaoChange = (uid: string, campeao: string) => {
-    // Only allow numbers or empty string
-    console.log(uid, campeao);
-    setLocalCampPreds(prev => {
-      const current = prev[uid] || { campeao: '' };
-      const updated = {
-        ...current,
-        campeao: campeao
-      };
-
-      // Auto-save if both fields have values
-      if (updated.campeao !== '') {
-        saveCampPrediction(uid, updated.campeao, finalPredictions?.segundo ?? "", finalPredictions?.terceiro ?? "");
-      }
-
-      return {
-        ...prev,
-        [uid]: updated
-      };
-    });
-  };
-
   const handleCampChange = (uid: string, campeao: string, segundo: string, terceiro: string) => {
     // Only allow numbers or empty string
-    console.log(uid, campeao, segundo, terceiro);
     setLocalCampPreds(prev => {
       const current = prev[uid] || { campeao: '', segundo: '', terceiro: '' };
       const updated = {
@@ -311,8 +319,6 @@ export default function PlayerPalpitePage() {
     }
   });
 
-  console.log("uid:", uid);
-  console.log("state:", localCampPreds);
 
   return (
     <div className="space-y-8">
@@ -436,6 +442,11 @@ export default function PlayerPalpitePage() {
               </select>
             </div>
 
+          </div>
+          <div className="flex flex-col gap-4 items-start justify-center mt-4 sm:flex-row text-2xl text-slate-400">
+            <span className="text-accent font-bold mt-1">
+                          ⏳ Palpite dos campeões fecha em {getCountdown(campDate)}
+            </span>
           </div>
         </div>
 
@@ -596,6 +607,8 @@ export default function PlayerPalpitePage() {
                   <div className="w-33 text-[10px] text-slate-550 flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     {formatDateTime(game.date)}
+                    
+                    
                   </div>
 
                   <button
@@ -643,6 +656,13 @@ export default function PlayerPalpitePage() {
                       </div>
                     )}
                   </div>
+                </div>
+                <div className="border-emerald-950/30 border-t flex items-center justify-center pt-3">
+                        {!isFinished && (
+                        <span className="text-accent font-bold mt-1">
+                          ⏳ Palpite fecha em {getCountdown(game.date)}
+                        </span>
+                      )}
                 </div>
               </div>
             );
