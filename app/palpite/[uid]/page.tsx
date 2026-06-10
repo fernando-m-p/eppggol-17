@@ -132,7 +132,7 @@ export default function PlayerPalpitePage() {
     const tenMinutesInMs = 10 * 60 * 1000;
     return now >= (kickoff - tenMinutesInMs);
   };
-  const campDate = "2026-06-10T19:00:00"; // Example date for championship prediction deadline
+  const campDate = "2026-06-10T23:59:59"; // Example date for championship prediction deadline
   const getCountdown = (dateStr: string) => {
       const target = new Date(dateStr).getTime() - (10 * 60 * 1000); // 10 minutes before kickoff;
       const diff = target - currentTime;
