@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
 
         const now = new Date();
-        const deadline = new Date("2026-06-10");
+        const deadline = new Date("2026-06-10T23:59:59Z");
 
         if (now > deadline) {
             return NextResponse.json({ error: "Prazo encerrado para palpites finais" }, { status: 400 });
