@@ -70,3 +70,7 @@ body {
 .text-accent {
   color: var(--accent);
 }
+
+.text-red {
+  color: red;
+}
