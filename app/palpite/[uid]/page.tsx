@@ -628,6 +628,7 @@ export default function PlayerPalpitePage() {
                   </div>
 
                   <button
+                    disabled={locked || isFinished}
                     onClick={(e) => {
                       handleInputChange(game.id, 'B', Math.floor(Math.random() * 6).toString())
                       handleInputChange(game.id, 'A', Math.floor(Math.random() * 6).toString())
