@@ -364,7 +364,7 @@ export default function PlayerPalpitePage() {
                 Campeão
               </label>
               <select
-                disabled={lockCampPalpite}
+                disabled={!lockCampPalpite}
                 value={localCampPreds[uid ?? ""]?.campeao ?? ""}
                 onChange={(e) =>
                   handleCampChange(
@@ -395,7 +395,7 @@ export default function PlayerPalpitePage() {
                 Segundo Lugar
               </label>
               <select
-                disabled={lockCampPalpite}
+                disabled={!lockCampPalpite}
                 value={localCampPreds[uid ?? ""]?.segundo ?? ""}
                 onChange={(e) =>
                   handleCampChange(
