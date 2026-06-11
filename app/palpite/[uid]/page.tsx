@@ -364,6 +364,7 @@ export default function PlayerPalpitePage() {
                 Campeão
               </label>
               <select
+                disabled={lockCampPalpite}
                 value={localCampPreds[uid ?? ""]?.campeao ?? ""}
                 onChange={(e) =>
                   handleCampChange(
@@ -394,6 +395,7 @@ export default function PlayerPalpitePage() {
                 Segundo Lugar
               </label>
               <select
+                disabled={lockCampPalpite}
                 value={localCampPreds[uid ?? ""]?.segundo ?? ""}
                 onChange={(e) =>
                   handleCampChange(
@@ -424,6 +426,7 @@ export default function PlayerPalpitePage() {
               </label>
               <select
                 value={localCampPreds[uid ?? ""]?.terceiro ?? ""}
+                disabled={!lockCampPalpite}
                 onChange={(e) =>
                   handleCampChange(
                     uid ?? "",
@@ -671,11 +674,16 @@ export default function PlayerPalpitePage() {
                   </div>
                 </div>
                 <div className="border-emerald-950/30 border-t flex items-center justify-center pt-3">
-                  {!isFinished && (
-                    <span className="text-accent font-bold mt-1">
-                      ⏳ Palpite fecha em {getCountdown(game.date)}
+                  {isFinished ? (
+                    <span className="text-red font-bold mt-1">
+                      Palpite fechado
                     </span>
-                  )}
+                  ) :
+                    (
+                      <span className="text-accent font-bold mt-1">
+                        ⏳ Palpite fecha em {getCountdown(game.date)}
+                      </span>
+                    )}
                 </div>
               </div>
             );
