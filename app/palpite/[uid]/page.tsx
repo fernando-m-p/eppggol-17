@@ -95,7 +95,7 @@ export default function PlayerPalpitePage() {
         };
       });
       setLocalPreds(predsMap);
-
+      setlockCampPalpite(getCountdown(campDate) != 'Jogo iniciado');
       const preadsCMap: { [uid: string]: { campeao: string, segundo: string, terceiro: string } } = {};
       (playerData.finalPredictions ?? []).forEach((predC: FinalPrediction) => {
         preadsCMap[playerData.uid] = {
@@ -140,7 +140,7 @@ export default function PlayerPalpitePage() {
     const diff = target - currentTime;
 
     if (diff <= 0) {
-      setlockCampPalpite(true)
+
       return 'Jogo iniciado';
 
     }
