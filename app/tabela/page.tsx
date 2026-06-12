@@ -75,13 +75,15 @@ export default function StandingsPage() {
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-emerald-950/60 pb-6">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            <Trophy className="text-amber-500 w-8 h-8" />
-            Classificação <span className="gold-gradient-text">Geral</span>
+
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Classificação <span className="gold-gradient-text">da Copa</span>
           </h1>
+
           <p className="text-slate-400 text-sm mt-1">
-            Veja as pontuações e acompanhe os palpites dos adversários em tempo real.
+            Acompanhe a classificação ao vivo e veja como está a classificação da copa.
           </p>
+
         </div>
         <div>
           <button
