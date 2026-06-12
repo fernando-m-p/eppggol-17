@@ -27,23 +27,14 @@ interface Game {
   status: string;
 }
 
-function generateStandings(games: Game[]) {
-  const groups: Record<string, Record<string, TeamStats>> = {};
+function generateStandings(games: Game[]): TeamStats[] {
+  const table: Record<string, TeamStats> = {};
 
   games
-    .filter(g => g.status === 'finished' && g.goalsA !== null && g.goalsB !== null)
     .forEach(game => {
-      const group = game.stage;
-
-      if (!groups[group]) {
-        groups[group] = {};
-      }
-
-      const groupTable = groups[group];
-
       const ensureTeam = (name: string, flag: string): TeamStats => {
-        if (!groupTable[name]) {
-          groupTable[name] = {
+        if (!table[name]) {
+          table[name] = {
             team: name,
             flag,
             played: 0,
@@ -56,16 +47,19 @@ function generateStandings(games: Game[]) {
             points: 0,
           };
         }
-        return groupTable[name];
+        return table[name];
       };
 
       const teamA = ensureTeam(game.teamA, game.flagA);
       const teamB = ensureTeam(game.teamB, game.flagB);
 
-      // Atualiza jogos
-      teamA.played++;
-      teamB.played++;
+      // Jogos
+      if (game.status === 'finished') {
+        teamA.played++;
+        teamB.played++;
+      }
 
+      // Gols
       teamA.goalsFor += game.goalsA!;
       teamA.goalsAgainst += game.goalsB!;
 
@@ -73,15 +67,15 @@ function generateStandings(games: Game[]) {
       teamB.goalsAgainst += game.goalsA!;
 
       // Resultado
-      if (game.goalsA! > game.goalsB!) {
+      if (game.status === 'finished' && game.goalsA! > game.goalsB!) {
         teamA.wins++;
         teamB.losses++;
         teamA.points += 3;
-      } else if (game.goalsA! < game.goalsB!) {
+      } else if (game.status === 'finished' && game.goalsA! < game.goalsB!) {
         teamB.wins++;
         teamA.losses++;
         teamB.points += 3;
-      } else {
+      } else if (game.status === 'finished') {
         teamA.draws++;
         teamB.draws++;
         teamA.points += 1;
@@ -89,26 +83,19 @@ function generateStandings(games: Game[]) {
       }
     });
 
-  // Ordenação estilo Copa (GE)
-  Object.values(groups).forEach(group => {
-    Object.values(group).forEach(team => {
-      team.goalDiff = team.goalsFor - team.goalsAgainst;
-    });
+  // Calcula saldo
+  Object.values(table).forEach(team => {
+    team.goalDiff = team.goalsFor - team.goalsAgainst;
   });
 
-  const sortedGroups: Record<string, TeamStats[]> = {};
-
-  Object.entries(groups).forEach(([groupName, teams]) => {
-    sortedGroups[groupName] = Object.values(teams).sort((a, b) => {
-      return (
-        b.points - a.points ||
-        b.goalDiff - a.goalDiff ||
-        b.goalsFor - a.goalsFor
-      );
-    });
+  // Retorna array ordenado
+  return Object.values(table).sort((a, b) => {
+    return (
+      b.points - a.points ||
+      b.goalDiff - a.goalDiff ||
+      b.goalsFor - a.goalsFor
+    );
   });
-
-  return sortedGroups;
 }
 
 export { generateStandings };
