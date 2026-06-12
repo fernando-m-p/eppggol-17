@@ -326,6 +326,29 @@ export default function StandingsPage() {
                         </div>
 
                         {/* Status updater and action button */}
+                        <div className=" flex items-center justify-center text-xs border-t border-emerald-950/35 pt-3">
+                          {/* Status selectors */}
+                          {
+                            game.status === 'live' &&
+                            <div className="flex items-center gap-2 px-3 py-1  ">
+
+                              {/* Bolinha animada */}
+                              <span className="relative flex h-3 w-3">
+                                {/* Animação pulse */}
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping"></span>
+
+                                {/* Bolinha fixa */}
+                                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.6)]"></span>
+                              </span>
+
+                              {/* Texto */}
+                              <span className="tracking-wide">AO VIVO</span>
+                            </div>
+
+
+                          }
+
+                        </div>
 
                       </div>
                     );

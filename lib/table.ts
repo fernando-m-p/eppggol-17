@@ -54,7 +54,7 @@ function generateStandings(games: Game[]): TeamStats[] {
       const teamB = ensureTeam(game.teamB, game.flagB);
 
       // Jogos
-      if (game.status === 'finished') {
+      if (game.status === 'finished' || game.status === 'live') {
         teamA.played++;
         teamB.played++;
       }
@@ -67,19 +67,22 @@ function generateStandings(games: Game[]): TeamStats[] {
       teamB.goalsAgainst += game.goalsA!;
 
       // Resultado
-      if (game.status === 'finished' && game.goalsA! > game.goalsB!) {
-        teamA.wins++;
-        teamB.losses++;
-        teamA.points += 3;
-      } else if (game.status === 'finished' && game.goalsA! < game.goalsB!) {
-        teamB.wins++;
-        teamA.losses++;
-        teamB.points += 3;
-      } else if (game.status === 'finished') {
-        teamA.draws++;
-        teamB.draws++;
-        teamA.points += 1;
-        teamB.points += 1;
+      if (game.status === 'finished' || game.status === 'live') {
+
+        if (game.goalsA! > game.goalsB!) {
+          teamA.wins++;
+          teamB.losses++;
+          teamA.points += 3;
+        } else if (game.goalsA! < game.goalsB!) {
+          teamB.wins++;
+          teamA.losses++;
+          teamB.points += 3;
+        } else {
+          teamA.draws++;
+          teamB.draws++;
+          teamA.points += 1;
+          teamB.points += 1;
+        }
       }
     });
 
