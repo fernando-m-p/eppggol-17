@@ -46,6 +46,12 @@ export default function RootLayout({
               {/* Navigation Links */}
               <nav className="flex space-x-1 sm:space-x-3">
                 <Link
+                  href="/tabela"
+                  className="px-3.y py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-emerald-950/40 transition-all"
+                >
+                  Tabela da Copa
+                </Link>
+                <Link
                   href="/ranking"
                   className="px-3.y py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-emerald-950/40 transition-all"
                 >
