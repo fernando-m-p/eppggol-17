@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { generateStandings, TeamStats, Game } from '../../lib/table';
-import { Award, Calendar, Eye, Loader2, RefreshCw, Save, Trophy } from 'lucide-react';
+import { Award, Calendar, Eye, Loader2, RefreshCw, Save, Table2, Trophy } from 'lucide-react';
 
 export default function StandingsPage() {
   const [games, setGames] = useState<Game[]>([]);
@@ -76,7 +76,8 @@ export default function StandingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-emerald-950/60 pb-6">
         <div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            <Table2 className="text-amber-500 w-8 h-8" />
             Classificação <span className="gold-gradient-text">da Copa</span>
           </h1>
 
