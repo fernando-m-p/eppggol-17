@@ -27,6 +27,9 @@ export async function POST(request: Request) {
         status: status || 'scheduled'
       }
     });
+    if (game.status !== 'finished') {
+      return NextResponse.json({ success: true, game });
+    }
 
     // Fetch all predictions for this game
     const predictions = await prisma.prediction.findMany({
