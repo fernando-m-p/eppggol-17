@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { generateStandings, TeamStats, Game } from '../../lib/table';
-import { Award, Calendar, Eye, Loader2, RefreshCw, Save, Table2, Trophy } from 'lucide-react';
+import { Table2, Award, Calendar, Lock, Unlock, CheckCircle, RefreshCw, Eye } from 'lucide-react';
+import { calculatePoints } from '@/lib/scoring';
 
 export default function StandingsPage() {
   const [games, setGames] = useState<Game[]>([]);
@@ -11,17 +12,38 @@ export default function StandingsPage() {
   const [gameTab, setGameTab] = useState<'grupo' | 'matamata'>('grupo');
   const [activeGroup, setActiveGroup] = useState<string>('Grupo A');
   const [activeStage, setActiveStage] = useState<string>('16 avos de final');
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
+  const isLocked = (kickoffDate: string) => {
+    const kickoff = new Date(kickoffDate).getTime();
+    const now = Date.now();
+    const tenMinutesInMs = 10 * 60 * 1000;
+    return now >= (kickoff - tenMinutesInMs);
+  };
 
+  const formatDateTime = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  useEffect(() => {
+    console.log(selectedGame);
+  }, [selectedGame]);
 
   const fetchData = async () => {
     try {
       const [gamesRes] = await Promise.all([
-        fetch('/api/games')
+        fetch('/api/games/predictions')
       ]);
       const gamesData = await gamesRes.json();
 
       setGames(Array.isArray(gamesData) ? gamesData : []);
+
 
     } catch (e) {
       console.error('Error fetching data:', e);
@@ -329,8 +351,15 @@ export default function StandingsPage() {
                         </div>
 
                         {/* Status updater and action button */}
-                        <div className=" flex items-center justify-center text-xs border-t border-emerald-950/35 pt-3">
+                        <div className={` flex items-center text-xs border-t border-emerald-950/35 pt-3 ${game.status === 'live' ? 'justify-between' : 'justify-center'}`}>
                           {/* Status selectors */}
+                          {isLocked(game.date) && <button
+                            onClick={() => setSelectedGame(game)}
+                            className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 hover:bg-emerald-900 border border-emerald-800/30 hover:text-white transition-all"
+                          >
+                            <Eye className="w-3.5 h-3.5" /> Palpites
+                          </button>
+                          }
                           {
                             game.status === 'live' &&
                             <div className="flex items-center gap-2 px-3 py-1  ">
@@ -364,7 +393,120 @@ export default function StandingsPage() {
         </>
       )}
 
+      {selectedGame && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-3xl max-h-[85vh] flex flex-col rounded-2xl glass-panel shadow-2xl border border-emerald-900/60 overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-emerald-950/60 bg-emerald-950/40">
+              <div>
+                <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">Acompanhamento</span>
+                <h3 className="text-xl font-black text-white mt-0.5">Palpites de {selectedGame.teamA} x {selectedGame.teamB}</h3>
+              </div>
+              <button
+                onClick={() => setSelectedGame(null)}
+                className="rounded-lg p-1 text-slate-400 hover:text-white hover:bg-emerald-950 transition-all font-bold text-sm"
+              >
+                ✕ Fechar
+              </button>
+            </div>
 
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+
+              {games.length === 0 ? (
+                <p className="text-center text-slate-500 py-8">Nenhum jogo encontrado no sistema.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {selectedGame.predictions.map((prediction) => {
+                    return (
+                      <div
+                        key={selectedGame.id + prediction.player.name}
+                        className={`flex flex-col p-4 rounded-xl border border-emerald-950/60 bg-black/20 `}
+                      >
+                        {/* Phase & Stadium */}
+                        <div className="flex items-center justify-between  text-slate-400 mb-2">
+                          <h4 className="font-black text-white mt-0.5 green-gradient-text">{prediction.player.name}</h4>
+
+                        </div>
+
+                        {/* Match Row */}
+                        <div className="flex items-center justify-between py-2">
+                          {/* Team A */}
+                          <div className="flex items-center space-x-2 w-[40%]">
+                            <span className="text-xl">{selectedGame.flagA}</span>
+                            <span className="text-sm font-bold text-white">{selectedGame.teamA}</span>
+                          </div>
+
+                          {/* Prediction display */}
+                          <div className="flex flex-col items-center justify-center w-[20%] text-center">
+                            <div className="text-base font-extrabold text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-lg border border-emerald-800/40">
+                              {prediction.goalsA} x {prediction.goalsB}
+                            </div>
+                          </div>
+
+                          {/* Team B */}
+                          <div className="flex items-center justify-end space-x-2 w-[40%]">
+                            <span className="text-sm font-bold text-white">{selectedGame.teamB}</span>
+                            <span className="text-xl">{selectedGame.flagB}</span>
+                          </div>
+                        </div>
+
+                        {/* Status / Points Info */}
+                        <div className={`mt-3 flex items-center  text-xs border-t border-emerald-950/30 pt-2.5 ${selectedGame.status === 'live' ? 'justify-between' : 'justify-center'}`}>
+                          {selectedGame.status === 'live' ?
+                            (<>
+                              <div className="flex items-center  gap-2 px-3 py-1  ">
+
+                                {/* Bolinha animada */}
+                                <span className="relative flex h-3 w-3">
+                                  {/* Animação pulse */}
+                                  <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping"></span>
+
+                                  {/* Bolinha fixa */}
+                                  <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.6)]"></span>
+                                </span>
+
+                                {/* Texto */}
+                                <span className="tracking-wide">AO VIVO</span>
+
+                              </div>
+                              <span className="text-red-500 font-black px-2 py-0.5 rounded">
+                                +{calculatePoints(
+                                  prediction.goalsA,
+                                  prediction.goalsB,
+                                  selectedGame.goalsA,
+                                  selectedGame.goalsB,
+                                  selectedGame.stage
+                                )} pts {" (Pontuação parcial)"}
+                              </span>
+                            </>
+                            )
+                            : (
+                              <span className={`font-black px-2 py-0.5 rounded ${prediction.points >= 3 ? 'text-amber-400' : prediction.points == 1 ? 'text-slate-400' : 'text-white'}`}>
+                                +{prediction?.points || 0} pts
+                              </span>
+                            )
+                          }
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-black/40 border-t border-emerald-950/60 text-right">
+              <button
+                onClick={() => setSelectedGame(null)}
+                className="px-4 py-2 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-semibold hover:bg-emerald-900 hover:text-white transition-all text-sm"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
