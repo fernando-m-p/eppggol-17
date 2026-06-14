@@ -25,6 +25,15 @@ interface Game {
   goalsA: number | null;
   goalsB: number | null;
   status: string;
+  predictions: {
+    goalsA: number;
+    goalsB: number;
+    points: number;
+    player: {
+      name: string;
+
+    }
+  }[]
 }
 
 function generateStandings(games: Game[]): TeamStats[] {
