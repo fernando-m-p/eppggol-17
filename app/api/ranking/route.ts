@@ -63,7 +63,7 @@ export async function GET() {
       if (b.exactCount !== a.exactCount) {
         return b.exactCount - a.exactCount;
       }
-      return a.name.localeCompare(b.name);
+      return b.name.localeCompare(a.name);
     });
 
     return NextResponse.json(ranking);
