@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { calculatePoints } from '@/lib/scoring';
 
 function getCurrentDateTime() {
     const now = new Date();
@@ -67,6 +68,23 @@ export async function GET() {
             },
             orderBy: { date: 'asc' }
         });
+        games.map(g => {
+            if (g.status == 'live') {
+                g.predictions.map(prediction => {
+                    prediction.points = calculatePoints(
+                        prediction.goalsA,
+                        prediction.goalsB,
+                        g.goalsA,
+                        g.goalsB,
+                        g.stage
+                    );
+                })
+                g.predictions.sort((a, b) => b.points - a.points);
+            }
+
+        });
+
+
         return NextResponse.json(games);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });

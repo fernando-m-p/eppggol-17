@@ -32,7 +32,6 @@ export default function StandingsPage() {
   };
 
   useEffect(() => {
-    console.log(selectedGame);
   }, [selectedGame]);
 
   const fetchData = async () => {
@@ -354,7 +353,9 @@ export default function StandingsPage() {
                         <div className={` flex items-center text-xs border-t border-emerald-950/35 pt-3 ${game.status === 'live' ? 'justify-between' : 'justify-center'}`}>
                           {/* Status selectors */}
                           {isLocked(game.date) && <button
-                            onClick={() => setSelectedGame(game)}
+                            onClick={() => {
+                              setSelectedGame(game)
+                            }}
                             className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 hover:bg-emerald-900 border border-emerald-800/30 hover:text-white transition-all"
                           >
                             <Eye className="w-3.5 h-3.5" /> Palpites
@@ -471,13 +472,7 @@ export default function StandingsPage() {
 
                               </div>
                               <span className="text-red-500 font-black px-2 py-0.5 rounded">
-                                +{calculatePoints(
-                                  prediction.goalsA,
-                                  prediction.goalsB,
-                                  selectedGame.goalsA,
-                                  selectedGame.goalsB,
-                                  selectedGame.stage
-                                )} pts {" (Pontuação parcial)"}
+                                +{prediction?.points || 0} pts {" (Pontuação parcial)"}
                               </span>
                             </>
                             )
