@@ -83,9 +83,13 @@ export default function PlayerPalpitePage() {
       const playerData = await playerRes.json();
       const gamesData = await gamesRes.json();
       const teamsData = await teamsRes.json();
+
       setPlayer(playerData);
       setGames(Array.isArray(gamesData) ? gamesData : []);
       setTeams(teamsData);
+      if (gamesData.filter((g: Game) => (g.status.localeCompare('finished') == 0 && g.stage.includes('16'))).length > 0) {
+        setActiveTab('matamata');
+      }
       // Populate local predictions map
       const predsMap: { [gameId: number]: { goalsA: string; goalsB: string } } = {};
       (playerData.predictions ?? []).forEach((pred: Prediction) => {
@@ -93,6 +97,7 @@ export default function PlayerPalpitePage() {
           goalsA: pred.goalsA.toString(),
           goalsB: pred.goalsB.toString()
         };
+
       });
       setLocalPreds(predsMap);
       setlockCampPalpite(getCountdown(campDate) != 'Jogo iniciado');
